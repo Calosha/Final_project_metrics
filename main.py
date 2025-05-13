@@ -17,12 +17,13 @@ async def root():
 async def metrics():
     """Return system metrics for this CDN node"""
     import psutil
-    
+    connections = psutil.net_connections(kind='tcp')
+    http_connections = [conn for conn in connections if conn.laddr.port == 80 and conn.status == 'ESTABLISHED']
     return {
         "cpu_percent": psutil.cpu_percent(),
         "memory_percent": psutil.virtual_memory().percent,
         "disk_percent": psutil.disk_usage('/').percent,
-        "connections": 0  # This will be updated later with actual connection count
+        "connections": len(http_connections),
     }
 @app.get("/health")
 async def health_check():
